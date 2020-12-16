@@ -31,28 +31,25 @@ namespace ExcelAddIn1
         private void mergeWorkbooks(object sender, RibbonControlEventArgs e)
         {
 
-            string path = choosePath();
-            if (path.Length > 0)
+            List<String> files = chooseFiles();
+            if (files.Count > 0)
             {
                 Excel.Application Application = Globals.ThisAddIn.Application;
                 Excel.Workbooks Workbooks = Application.Workbooks;
                 Application.ScreenUpdating = false;
-                DirectoryInfo Dir = new DirectoryInfo(path);
-                List<String> list = new List<string>();
                 Excel.Workbook desWb = Workbooks.Add();
                 Excel.Worksheet activeSheet = desWb.ActiveSheet;
+                /*
                 foreach (FileInfo f in Dir.GetFiles("*.xls", SearchOption.TopDirectoryOnly))
                 {
                     list.Add(f.FullName);
                 }
-                
-                merge(Workbooks, activeSheet, list);
-                saveFile(desWb);
-                desWb.Close();
+                */
+                merge(Workbooks, activeSheet, files);
 
                 Application.ScreenUpdating = true;
-                string result = "合并文件 " + list.Count + " 个\n" + string.Join("\n", list.ToArray());
-                MessageBox.Show(result, "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                string result = "合并文以下件 " + files.Count + " 个：\n" + string.Join("\n", files.ToArray());
+                MessageBox.Show(result, "合并成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 
             }    
         }
@@ -77,6 +74,7 @@ namespace ExcelAddIn1
 
         private void saveFile(Excel.Workbook wb)
         {
+            
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "All files(*.*)|*.*";
             saveFileDialog.FileName = "mergeResult";
@@ -93,7 +91,35 @@ namespace ExcelAddIn1
             }
             wb.SaveAs(fileName);
         }
-        private string choosePath()
+        
+        /**
+         * 选择多个文件
+         * */
+        private List<String> chooseFiles()
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+            dlg.Multiselect = true;
+            dlg.Title = "选择需要合并的Excel文件";
+            dlg.Filter = "All files|*.*|xlsx|*.xlsx|xls|*.xls";
+            List<String> files = new List<string>();
+            if (dlg.ShowDialog() == DialogResult.OK)
+            {
+
+                foreach (string file in dlg.FileNames)
+                {
+                    files.Add(file);
+                    MessageBox.Show(file);
+                }
+
+            }
+            return files;
+
+        }
+
+        /**
+         * 选择目录
+         * */
+        private string choosepath()
         {
             FolderBrowserDialog dlgOpenPath = new FolderBrowserDialog();
             dlgOpenPath.Description = "选择待合并文件的目录";
